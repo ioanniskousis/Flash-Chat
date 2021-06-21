@@ -49,7 +49,7 @@ class ChatViewController: UIViewController {
             } else {
                 if let snapshotDocument = querySnapstot?.documents {
                     for doc in snapshotDocument {
-                        print(doc.data())
+//                        print(doc.data())
                         let data = doc.data()
                         if let messageSender = data[K.FStore.senderField] as? String, let messageBody = data[K.FStore.bodyField] as? String {
                             let newMessage = Message(sender: messageSender, body: messageBody)
@@ -77,7 +77,7 @@ class ChatViewController: UIViewController {
                 if let e = error {
                     print("There was an issue saving data to firestore, \(e)")
                 } else {
-                    print("Successfully saved data.")
+//                    print("Successfully saved data.")
                 }
             }
             
@@ -105,7 +105,21 @@ extension ChatViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.cellIdentifier, for: indexPath) as! MessageCell
-        cell.label.text = messages[indexPath.row].body
+        
+        let message = messages[indexPath.row]
+        cell.label.text = message.body
+        
+        if message.sender == Auth.auth().currentUser?.email {
+            cell.leftImageView.isHidden = true
+            cell.rightImageView.isHidden = false
+            cell.messageBubble.backgroundColor = UIColor(named: K.BrandColors.lightPurple)
+            cell.label.textColor = UIColor(named: K.BrandColors.purple)
+        } else {
+            cell.leftImageView.isHidden = false
+            cell.rightImageView.isHidden = true
+            cell.messageBubble.backgroundColor = UIColor(named: K.BrandColors.purple)
+            cell.label.textColor = UIColor(named: K.BrandColors.lightPurple)
+        }
         
         return cell
     }
