@@ -17,12 +17,7 @@ class ChatViewController: UIViewController {
     let db = Firestore.firestore()
     
     
-    var messages: [Message] = [
-        Message(sender: "1@2.com", body: "Hey!"),
-        Message(sender: "a@b.com", body: "Hello! wdf fsd sdf sdf sdfs df sdf sdfa sdfs df sdfsdfsdfsdfd sdf sdf sdf sdf sdf"),
-        Message(sender: "1@2.com", body: "What's up?")
-        
-    ]
+    var messages: [Message] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,8 +34,6 @@ class ChatViewController: UIViewController {
     }
     
     func loadMessages() {
-//        messages = []
-        
 //        db.collection(K.FStore.collectionName).getDocuments { querySnapstot, error in
         db.collection(K.FStore.collectionName).order(by: K.FStore.dateField).addSnapshotListener { querySnapstot, error in
             self.messages = []
@@ -49,7 +42,6 @@ class ChatViewController: UIViewController {
             } else {
                 if let snapshotDocument = querySnapstot?.documents {
                     for doc in snapshotDocument {
-//                        print(doc.data())
                         let data = doc.data()
                         if let messageSender = data[K.FStore.senderField] as? String, let messageBody = data[K.FStore.bodyField] as? String {
                             let newMessage = Message(sender: messageSender, body: messageBody)
@@ -57,6 +49,8 @@ class ChatViewController: UIViewController {
                             
                             DispatchQueue.main.async {
                                 self.tableView.reloadData()
+                                let indexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                                self.tableView.scrollToRow(at: indexPath, at: .top, animated: true)
                             }
                         }
                     }
@@ -77,7 +71,9 @@ class ChatViewController: UIViewController {
                 if let e = error {
                     print("There was an issue saving data to firestore, \(e)")
                 } else {
-//                    print("Successfully saved data.")
+                    DispatchQueue.main.async {
+                        self.messageTextfield.text = ""
+                    }
                 }
             }
             
